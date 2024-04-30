@@ -44,9 +44,10 @@ where a.balance = (select min(balance) from accounts);
 -- 7. Identify customers who have accounts of multiple types.
 select c.customer_id, c.first_name, c.last_name
 from customers c
-inner join accounts a on c.customer_id = a.customer_id
-group by c.customer_id, c.first_name, c.last_name
-having count(distinct a.account_type) > 1;
+inner join (select customer_id 
+from accounts 
+group by customer_id 
+having count(distinct account_type) > 1) as multi_account_customers on c.customer_id = multi_account_customers.customer_id;
 
 -- 8. Calculate the percentage of each account type out of the total number of accounts.
 select account_type, 
@@ -57,8 +58,7 @@ group by account_type;
 -- 9. Retrieve all transactions for a customer with a given customer_id.
 select t.*
 from transactions t
-inner join accounts a on t.account_id = a.account_id
-where a.customer_id = 101;
+where t.account_id in (select account_id from accounts where customer_id = 101);
 
 -- 10. Calculate the total balance for each account type, including a subquery within the SELECT clause.
 select account_type, 
