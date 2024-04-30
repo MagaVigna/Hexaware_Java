@@ -15,9 +15,11 @@ where transaction_type = 'deposit'
 and transaction_date = '2024-04-01';
 
 -- 4. Write a SQL query to Find the Oldest and Newest Customers.
-select first_name, last_name, dob
-from customers
-order by dob;
+select c1.first_name, c2.first_name
+from customers c1
+join customers c2 on
+c1.customer_id=(select min(customer_id) from customers) and
+c2.customer_id=(select max(customer_id) from customers);
 
 -- 5. Write a SQL query to Retrieve transaction details along with the account type.
 select t.*, a.account_type
@@ -44,7 +46,8 @@ group by c.customer_id
 having count(a.account_id) > 1;
 
 -- 9. Write a SQL query to Calculate the difference in transaction amounts between deposits and withdrawals.
-select account_id, sum(case when transaction_type = 'deposit' then amount else -amount end) as transaction_difference
+select account_id,
+      sum(amount) - sum(amount * (transaction_type <> 'deposit')) as transaction_difference
 from transactions
 group by account_id;
 
